@@ -1,6 +1,6 @@
 ## Locality Store app
 
-<img src="./.github/images/screens.png" alt="Locality Store app screens"/>
+<img src="https://www.ec2server.online/localityorg/logo/screensstore.png" alt="Locality Store app screens"/>
 
 Introducing the mobile application designed to revolutionize local retail stores – Locality! With Locality Store app, you can manage your retail store from anywhere in the world, in just 15 minutes. It's never been easier to get started with a retail management app, and the benefits are endless.
 
@@ -48,17 +48,21 @@ This app is built majorly using React Native, Graphql, react-native-ui-lib, and 
 1. Clone the repository
 
 ```bash
-git clone https://github.com/localityorg/user.git locality-user
+git clone https://github.com/localityorg/store.git locality-store
 ```
 
 2. Install dependencies
 
 ```bash
-cd locality-user
+cd locality-store
 npm install
 ```
 
 3. Run the app
+
+```bash
+npx react-native start
+```
 
 This will start the Metro bundler. You can then run the app on your iOS or Android device using the Expo app.
 
