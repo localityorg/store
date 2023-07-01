@@ -6,34 +6,24 @@ import {View} from '../Themed';
 import {Text} from '../Common/Text';
 
 import Sizes from '../../constants/Sizes';
+import {ProductProps} from './OrderCard';
 
 interface CounterProps {
   data: any;
-  item: {
-    id: string;
-  };
+  item: ProductProps;
   onAdd: any;
   onRemove: any;
 }
 
 export default function Counter(props: CounterProps) {
-  const [count, setCount] = useState<number>(0);
+  const [count, setCount] = useState<number>(props.item.quantity.units || 0);
   const [changed, setChanged] = useState<boolean>(false);
-  // const [initial, setInitial] = useState<number>(0);
-
-  function sC(setFunction: any) {
-    const item = props.data.find((e: any) => e.id === props.item.id);
-    const itemCount = item.quantity.units || item.itemQuantity || 0;
-    setFunction(itemCount);
-  }
-
-  // useEffect(() => {
-  //   sC(setInitial);
-  // }, []);
 
   useEffect(() => {
-    sC(setCount);
-    // setChanged(initial !== count);
+    var i = props.data.findIndex((e: ProductProps) => e.id === props.item.id);
+    if (i >= 0) {
+      setCount(props.data[i].quantity.units);
+    }
   }, [props.data]);
 
   return (

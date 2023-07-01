@@ -86,7 +86,7 @@ const Tracker = (props: TrackerProps): JSX.Element => {
         borderRadius: 10,
         padding: 10,
         borderWidth: 1,
-        borderColor: Colors.$iconPrimary + '44',
+        borderColor: Colors.primary + '44',
       }}
       disabled={true}
       onPress={() => setTimerView(false)}>

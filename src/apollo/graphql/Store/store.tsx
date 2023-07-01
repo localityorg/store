@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import {gql} from '@apollo/client';
 
 export const GET_STORE = gql`
   query GetStore {
@@ -14,6 +14,10 @@ export const GET_STORE = gql`
       meta {
         closed
         verified
+      }
+      upi {
+        display
+        lastUpdated
       }
       address {
         line
@@ -40,6 +44,10 @@ export const GET_STORE_ACCOUNTS = gql`
         closed
         verified
       }
+      upi {
+        display
+        lastUpdated
+      }
       address {
         line
         location {
@@ -64,6 +72,10 @@ export const EDIT_STORE = gql`
       meta {
         closed
         verified
+      }
+      upi {
+        display
+        lastUpdated
       }
       address {
         line
@@ -90,6 +102,10 @@ export const STORE_UPDATE = gql`
       meta {
         closed
         verified
+      }
+      upi {
+        display
+        lastUpdated
       }
       address {
         line

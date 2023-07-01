@@ -1,17 +1,19 @@
-import { gql } from "@apollo/client";
+import {gql} from '@apollo/client';
 
 // const PRODUCT_FRAGMENT = gql`
 //   fragment ProductDetail on Product {
 //     id
-//     url
 //     name
-//     quantity {
-//       count
-//       type
-//     }
+//     url
+//     barcode
 //     price {
 //       mrp
 //       discount
+//     }
+//     quantity {
+//       units
+//       count
+//       type
 //     }
 //   }
 // `;
@@ -28,6 +30,27 @@ export const SEARCH_PRODUCTS = gql`
         discount
       }
       quantity {
+        units
+        count
+        type
+      }
+    }
+  }
+`;
+
+export const PRODUCT_RECOMMENDATIONS = gql`
+  query ProductRecommendations($storeId: String!) {
+    productRecommendations(storeId: $storeId) {
+      id
+      name
+      url
+      barcode
+      price {
+        mrp
+        discount
+      }
+      quantity {
+        units
         count
         type
       }

@@ -60,6 +60,7 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
       name: store.name,
       contact: user.contact,
       licenseNumber: '',
+      upi: '',
       address: {
         line1: store.address.line,
         location: {
@@ -261,6 +262,21 @@ const StoreDetails = (props: DetailProps): JSX.Element => {
           }
           title="License Number"
           placeholder={'ISB000999999'}
+        />
+
+        <InputText
+          value={data.storeInfo.upi}
+          placeholder={store.upi.display || '999990000@upiid'}
+          onChange={(text: string) =>
+            setData({
+              ...data,
+              storeInfo: {
+                ...data.storeInfo,
+                upi: text,
+              },
+            })
+          }
+          title="Your UPI ID"
         />
       </View>
       <Button

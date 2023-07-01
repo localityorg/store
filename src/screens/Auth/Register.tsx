@@ -1,9 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Keyboard, PermissionsAndroid} from 'react-native';
+import {Alert, Keyboard} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {useLazyQuery, useMutation} from '@apollo/client';
 import {Button, Colors, TouchableOpacity, View} from 'react-native-ui-lib';
-import Geolocation from '@react-native-community/geolocation';
 import {useDispatch, useSelector} from 'react-redux';
 
 import Screen from '../../components/Common/Screen';
@@ -14,13 +13,13 @@ import {Map} from '../../components/Common/Map';
 import {BoldText, Text} from '../../components/Common/Text';
 import {OTPInput} from '../../components/Auth/OTPInput';
 
-import {removeUser, setLocation, setUser} from '../../redux/Common/actions';
+import {removeUser, setUser} from '../../redux/Common/actions';
 
 import Sizes from '../../constants/Sizes';
 import {TWOFACTOR_AUTH} from '../../apollo/graphql/Common/auth';
 import {EDIT_STORE} from '../../apollo/graphql/Store/store';
 import {AuthStackScreenProps} from '../../../types';
-import {removeStore} from '../../redux/Store/actions';
+import {removeStore, setStore} from '../../redux/Store/actions';
 
 export default function Register({
   navigation,
@@ -29,6 +28,7 @@ export default function Register({
 
   const [meta, setMeta] = useState<any>({
     tfaScreen: false,
+    upiScreen: false,
     registerScreen: false,
     mapScreen: false,
     date: '',
@@ -39,8 +39,6 @@ export default function Register({
     error: false,
     message: '',
   });
-
-  const [locationPermission, setLocationPermission] = useState<boolean>(false);
 
   const {location: storeLocation} = useSelector(
     (state: any) => state.locationReducer,
@@ -77,6 +75,7 @@ export default function Register({
     edit: false,
     storeInfo: {
       name: '',
+      upi: '',
       licenseNumber: '',
       address: {
         line1: '',
@@ -86,41 +85,6 @@ export default function Register({
       },
     },
   });
-
-  // good manners
-  useEffect(() => {
-    if (storeLocation === null) {
-      askForLocationPermission();
-    }
-  }, [storeLocation]);
-
-  // init good manners
-  const askForLocationPermission = () => {
-    (async () => {
-      const status = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location permission',
-          message:
-            'Locality Store needs access to your location to locate your store.',
-          buttonPositive: 'Allow Access',
-          buttonNegative: 'Cancel',
-        },
-      );
-
-      if (status === PermissionsAndroid.RESULTS.GRANTED) {
-        setLocationPermission(true);
-        Geolocation.getCurrentPosition(location => {
-          dispatch(
-            setLocation([
-              location.coords.latitude.toString(),
-              location.coords.longitude.toString(),
-            ]),
-          );
-        });
-      }
-    })();
-  };
 
   const [editStore, {loading: registering}] = useMutation(EDIT_STORE, {
     variables: {
@@ -136,7 +100,15 @@ export default function Register({
       if (data.editStore) {
         dispatch(removeUser());
         dispatch(removeStore());
-        dispatch(setUser(data.editStore));
+        var user = {
+          id: data.editStore.id,
+          name: data.editStore.name,
+          contact,
+          token: data.editStore.token,
+          refreshToken: data.editStore.refreshToken,
+        };
+        dispatch(setUser(user));
+        dispatch(setStore(data.editStore));
       }
     },
     onError(error) {
@@ -173,6 +145,74 @@ export default function Register({
       console.log({...error});
     },
   });
+
+  useEffect(() => {
+    var si = {...storeData};
+    si['storeInfo']['address']['location']['coordinates'] = storeLocation;
+    setStoreData(si);
+  }, [storeLocation]);
+
+  if (meta.upiScreen) {
+    return (
+      <Screen>
+        <Header
+          title="Payment"
+          onBack={() => {
+            setStoreData({
+              ...storeData,
+              storeInfo: {
+                ...storeData.storeInfo,
+                upi: '',
+              },
+            });
+            setMeta({...meta, upiScreen: false, registerScreen: true});
+          }}
+        />
+
+        <View flex>
+          <Text text70>
+            Enter upi address you would like to recieve payments on
+          </Text>
+          <InputText
+            placeholder="Eg. 999990000@paytm"
+            title="UPI Address"
+            value={storeData.storeInfo.upi}
+            onChange={(text: string) =>
+              setStoreData({
+                ...storeData,
+                storeInfo: {
+                  ...storeData.storeInfo,
+                  upi: text,
+                },
+              })
+            }
+          />
+        </View>
+        <Button
+          label={registering ? 'Registering...' : 'Confirm & Register'}
+          disabled={registering}
+          size={Button.sizes.large}
+          color={Colors.white}
+          backgroundColor={Colors.primary}
+          disabledBackgroundColor={Colors.$iconDisabled}
+          round={false}
+          borderRadius={10}
+          marginV-10
+          onPress={() =>
+            editStore({
+              variables: {
+                edit: storeData.edit,
+                storeInfo: {
+                  ...storeData.storeInfo,
+                  contact,
+                },
+              },
+            })
+          }
+        />
+      </Screen>
+    );
+  }
 
   if (meta.registerScreen) {
     return (
@@ -248,7 +288,7 @@ export default function Register({
                       color={
                         storeData.storeInfo.address.line1.trim().length <= 0
                           ? Colors.$backgroundDisabled
-                          : Colors.$backgroundDarkElevated
+                          : Colors.primary
                       }
                       size={Sizes.icon.normal}
                     />
@@ -258,33 +298,16 @@ export default function Register({
               {!isKeyboardVisible && <Map />}
               {storeLocation && !isKeyboardVisible && (
                 <Button
-                  label={registering ? 'Registering...' : 'Confirm & Register'}
-                  disabled={registering}
+                  label={'Set Payment'}
+                  disabled={!storeLocation}
                   size={Button.sizes.large}
+                  color={Colors.white}
                   backgroundColor={Colors.primary}
                   disabledBackgroundColor={Colors.$iconDisabled}
                   round={false}
                   borderRadius={10}
                   marginV-10
-                  onPress={() =>
-                    editStore({
-                      variables: {
-                        edit: storeData.edit,
-                        storeInfo: {
-                          ...storeData.storeInfo,
-                          name: storeData.storeInfo.name,
-
-                          address: {
-                            ...storeData.storeInfo.address,
-                            location: {
-                              coordinates: storeLocation,
-                            },
-                          },
-                          contact,
-                        },
-                      },
-                    })
-                  }
+                  onPress={() => setMeta({...meta, upiScreen: true})}
                 />
               )}
             </View>
@@ -320,25 +343,32 @@ export default function Register({
               />
             </View>
             <View flex />
-
-            <Text text70>
-              Note: Your license number will be used to verify your store. It is
-              not stored with us.
-            </Text>
-            <Button
-              label={'Select Address'}
-              disabled={storeData.storeInfo.name.trim().length <= 0}
-              size={Button.sizes.large}
-              backgroundColor={Colors.$backgroundDarkElevated}
-              disabledBackgroundColor={Colors.$iconDisabled}
-              round={false}
-              borderRadius={10}
-              marginV-10
-              onPress={() => {
-                setActive(false);
-                setMeta({...meta, mapScreen: true});
-              }}
-            />
+            {!isKeyboardVisible && (
+              <>
+                <Text text70>
+                  Note: Your license number will be used to verify your store.
+                  It is not stored with us.
+                </Text>
+                <Button
+                  label={'Select Address'}
+                  disabled={
+                    (storeData.storeInfo.name.trim().length ||
+                      storeData.storeInfo.licenseNumber.trim().length) <= 0
+                  }
+                  size={Button.sizes.large}
+                  color={Colors.white}
+                  backgroundColor={Colors.primary}
+                  disabledBackgroundColor={Colors.$iconDisabled}
+                  round={false}
+                  borderRadius={10}
+                  marginV-10
+                  onPress={() => {
+                    setActive(false);
+                    setMeta({...meta, mapScreen: true});
+                  }}
+                />
+              </>
+            )}
           </>
         )}
       </Screen>

@@ -98,8 +98,8 @@ android {
         applicationId "com.localityorg.store"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 6
+        versionName "1.0.5"
         missingDimensionStrategy 'react-native-camera', 'general'
     }
 

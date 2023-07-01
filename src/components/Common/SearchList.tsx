@@ -66,7 +66,7 @@ export function RenderSearchList(props: SearchListProps) {
           value={search}
           placeholder={props.placeholder}
           onChangeText={text => setSearch(text)}
-          selectionColor={Colors.$iconPrimary}
+          selectionColor={Colors.primary}
           style={{
             flex: 1,
             fontSize: Sizes.font.text,

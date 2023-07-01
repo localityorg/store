@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {ActivityIndicator, FlatList, TouchableOpacity} from 'react-native';
 import {Colors} from 'react-native-ui-lib';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {Header} from '../../components/Common/Header';
 import Screen from '../../components/Common/Screen';
 import {BoldText, Text} from '../../components/Common/Text';
@@ -139,8 +139,6 @@ export const AccountTile = (props: AccountDataProps): JSX.Element => {
 export default function Accounts({
   navigation,
 }: RootStackScreenProps<'Accounts'>) {
-  const dispatch: any = useDispatch();
-
   const [active, setActive] = useState<AccountDataProps | null>(null);
   const [accounts, setAccounts] = useState([]);
 

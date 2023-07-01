@@ -90,7 +90,7 @@ export default function QuickBill({
       console.log(error);
       if (error.graphQLErrors[0]) {
         setAssignerScreen(true);
-        if (dialogVisible) {
+        if (!dialogVisible) {
           setDialogVisible(true);
         }
       }
@@ -464,25 +464,6 @@ export default function QuickBill({
                       color={Colors.white}
                     />
                   </TouchableOpacity>
-
-                  {/* <TouchableOpacity
-                    onPress={() => {}}
-                    style={{
-                      justifyContent: "center",
-                      backgroundColor: Colors.$iconPrimary,
-                      paddingHorizontal: 15,
-                      marginBottom: 15,
-                      borderRadius: 10,
-                      marginLeft: 10,
-                    }}
-                    disabled={search.trim().length > 0 ? false : true}
-                  >
-                    <AntDesign
-                      name="plus"
-                      size={Sizes.icon.normal}
-                      color={Colors.white}
-                    />
-                  </TouchableOpacity> */}
                 </View>
               )}
             </View>

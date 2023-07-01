@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {FlatList} from 'react-native';
+import {ActivityIndicator, FlatList} from 'react-native';
 import {useSelector} from 'react-redux';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -87,6 +87,7 @@ export function InventoryProduct(props: InventoryProductProps) {
 interface ISearch {
   value: string;
   setValue: any;
+  loading?: boolean;
 }
 
 function SearchBar(props: ISearch) {
@@ -114,9 +115,13 @@ function SearchBar(props: ISearch) {
       />
       {props.value.trim().length > 0 && (
         <View row center style={{backgroundColor: 'transparent'}}>
-          <TouchableOpacity onPress={() => props.setValue('')}>
-            <AntDesign name="close" size={Sizes.icon.normal} />
-          </TouchableOpacity>
+          {props.loading ? (
+            <ActivityIndicator color={Colors.primary} />
+          ) : (
+            <TouchableOpacity onPress={() => props.setValue('')}>
+              <AntDesign name="close" size={Sizes.icon.normal} />
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
@@ -192,10 +197,7 @@ export default function EditInventory({
   navigation,
 }: RootStackScreenProps<'EditInventory'>) {
   const [edited, setEdited] = useState<Array<ProductProps>>([]);
-  const [searched, setSearched] = useState<{
-    i: Array<ProductProps>;
-    p: Array<ProductProps>;
-  }>({i: [], p: []});
+  const [searched, setSearched] = useState<Array<ProductProps>>([]);
 
   const [search, setSearch] = useState<string>('');
   const [mVisible, setMVisible] = useState<boolean>(false);
@@ -260,8 +262,8 @@ export default function EditInventory({
     },
     onCompleted(data) {
       if (data.getProducts) {
-        var inv = inventory.filter((p: ProductProps) => p.name === search);
-        setSearched({i: inv, p: data.getProducts});
+        // var inv = inventory.filter((p: ProductProps) => p.name === search);
+        setSearched(data.getProducts);
       }
     },
     onError(error) {
@@ -278,7 +280,7 @@ export default function EditInventory({
         },
       });
     } else {
-      setSearched({...searched, i: []});
+      setSearched([]);
     }
   }, [search]);
 
@@ -302,7 +304,7 @@ export default function EditInventory({
             height: 50,
             width: 50,
             borderRadius: 10,
-            backgroundColor: Colors.$iconPrimary,
+            backgroundColor: Colors.primary,
             margin: 30,
             zIndex: 999,
           }}
@@ -331,80 +333,25 @@ export default function EditInventory({
           })
         }
       />
-      <SearchBar value={search} setValue={setSearch} />
-      <FlatList
-        listKey="0104030239"
-        showsHorizontalScrollIndicator={false}
-        key={'100005'}
-        data={[1]}
-        keyExtractor={(item: number) => item.toString()}
-        renderItem={() => (
-          <>
-            {edited.length > 0 && (
-              <Section
-                title="Edited products"
-                body={
-                  <FlatList
-                    listKey="0104030234"
-                    data={edited}
-                    keyExtractor={item => item.id}
-                    renderItem={({item}) => (
-                      <InventoryProduct
-                        item={item}
-                        data={edited}
-                        onAdd={() => addToEdited(item)}
-                        onRemove={() => removeFromEdited(item)}
-                        editCount={true}
-                      />
-                    )}
-                  />
-                }
+      <SearchBar value={search} setValue={setSearch} loading={searching} />
+      <Section
+        title="Your Inventory"
+        body={
+          <FlatList
+            // listKey="0104030235"
+            data={searched}
+            keyExtractor={(item: ProductProps) => item.id}
+            renderItem={({item}) => (
+              <InventoryProduct
+                item={item}
+                data={edited}
+                onAdd={() => addToEdited(item)}
+                onRemove={() => removeFromEdited(item)}
+                editCount={false}
               />
             )}
-            {searched.p.length < 1 && (
-              <Section
-                title="Your Inventory"
-                body={
-                  <FlatList
-                    listKey="0104030235"
-                    data={searched.i.length > 0 ? searched.i : inventory}
-                    keyExtractor={(item: ProductProps) => item.id}
-                    renderItem={({item}) => (
-                      <InventoryProduct
-                        item={item}
-                        data={inventory}
-                        onAdd={() => addToEdited(item)}
-                        onRemove={() => removeFromEdited(item)}
-                        editCount={false}
-                      />
-                    )}
-                  />
-                }
-              />
-            )}
-            <Section
-              title="More products"
-              body={
-                <FlatList
-                  listKey="0104030236"
-                  data={searched.p}
-                  style={{marginBottom: 100}}
-                  keyExtractor={(item: ProductProps) => item.id}
-                  renderItem={({item}) => (
-                    <InventoryProduct
-                      item={item}
-                      data={inventory}
-                      onAdd={() => addToEdited(item)}
-                      onRemove={() => removeFromEdited(item)}
-                      editCount={true}
-                      add={true}
-                    />
-                  )}
-                />
-              }
-            />
-          </>
-        )}
+          />
+        }
       />
     </Screen>
   );
